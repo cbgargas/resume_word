@@ -1,0 +1,170 @@
+---
+format:
+  docx:
+    reference-doc:  Cory_ Gargas_resume_2024-11-25.docx
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  results='asis', 
+  echo = FALSE
+)
+pacman::p_load(glue, tidyverse)
+
+# ======================================================================
+# These variables determine how the the data is loaded and how the exports are
+# done.
+
+# Is data stored in google sheets? If no data will be gather from the csvs/
+# folder in project
+using_googlesheets <- FALSE
+
+# Just the copied URL from the sheet
+positions_sheet_loc <- "https://docs.google.com/spreadsheets/d/14MQICF2F8-vf8CKPF1m4lyGKO6_thG-4aSwat1e2TWc"
+
+# Is this sheet available for anyone to read? If you're using a private sheet
+# set this to false and go to gather_data.R and run the data loading manually
+# once to cache authentication
+sheet_is_publicly_readable <- TRUE
+
+# Is the goal of this knit to build a document that is exported to PDF? If so
+# set this to true to have links turned into footnotes at the end of the
+# document
+PDF_EXPORT <- FALSE
+
+
+# A global (gasp) variable that holds all the links that were inserted for
+# placement at the end
+links <- c()
+
+# ======================================================================
+# Now we source two external scripts. One contains functions for building the
+# text output and the other loads up our data from either googlesheets or csvs
+
+# Functions for building sections from CSV data
+source('parsing_functions.R') 
+
+# Load data for CV/Resume
+source('gather_data.R')
+
+# Now we just need to filter down the position data to include less verbose
+# categories and only the entries we have designated for the resume
+position_data <- position_data %>% 
+  filter(in_resume) %>% 
+  mutate(
+    # Build some custom sections by collapsing others
+    section = case_when(
+      section %in% c('research_positions', 'industry_positions') ~ 'positions', 
+      section %in% c('data_science_writings', 'by_me_press') ~ 'writings',
+      TRUE ~ section
+    )
+  ) 
+```
+
+
+:::{custom-style="resume - name"}  
+DR. CORY GARGAS
+:::
+
+:::{custom-style="Normal"}
+```{r, eval=TRUE}
+contact_info_glue <- 
+	contact_info |>
+  pull(contact) 
+  					 
+contact_info_glue <- 
+	paste(contact_info_glue, collapse = ' | ')
+
+cat(contact_info_glue)
+
+```
+:::
+
+<br />
+
+:::{custom-style="resume - section title"}  
+Summary
+:::
+
+<br />
+
+:::{custom-style="resume - summary"}  
+```{r}
+print_text_block(text_blocks, 'intro')
+```  
+:::
+
+<br />
+
+:::{custom-style="resume - section title"}  
+Experience
+:::
+<br />
+
+:::{custom-style="Normal"}  
+```{r}
+position_data %>% print_section('research')
+```
+:::
+<br />
+
+:::{custom-style="resume - section title"}  
+Education
+:::
+<br />
+
+:::{custom-style="Normal"} 
+```{r}
+position_data %>% print_ed('education')
+```
+:::
+<br />
+
+:::{custom-style="resume - section title"}  
+Volunteering
+:::
+<br />
+
+:::{custom-style="Normal"} 
+```{r}
+position_data %>% print_section('volunteer')
+```  
+:::
+<br />
+
+:::{custom-style="resume - section title"}  
+Professional Development
+:::
+<br />  
+
+:::{custom-style="Normal"} 
+```{r}
+position_data %>% print_ed('prof_development')
+```
+:::
+<br />  
+
+:::{custom-style="resume - section title"}  
+Technical Skills
+:::
+<br />  
+
+:::{custom-style="Normal"}
+```{r}
+skill_glue <- 
+	skills |> 
+	arrange(desc(level)) |>
+  pull(skill) 
+
+skill_glue <- 
+	paste(skill_glue, collapse = ' | ')
+
+cat(skill_glue)
+```
+:::
+
+<br /> 
+
+:::{custom-style="resume - quarto disclaimer"}
+Resume created using R and Quarto, Last updated: `r Sys.Date()`.
+:::
