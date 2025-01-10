@@ -1,2 +1,2 @@
 # resume_word
-Resume building script; word output with simpler formatting
+Resume building Quarto script. Updated from `resume` script to create word output with simpler formatting.
